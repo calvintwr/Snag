@@ -37,8 +37,18 @@ sendGrpc().catch(grpcError => {
      })
 }
 ```
+
+If you pass in an error object, it will turn it into a Snag error, with the error re-attached to the Snag.
+```js
+const error = Error('The error from upstream.')
+const snag = new Snag(error)
+snag.message // outputs 'The error from upstream.'
+snag.statusCode // outputs 500
+snag.error === error // outputs true
+```
+
 ## Options
-@param options Can be message in string, or an options object. If strings, defaults tag to 'not_handled'.
+@param options Can be message in string, any instances of Error, or an options object. If strings, defaults tag to 'not_handled'.
 @param options.error An error object of the original offending exception. If this is passed in, it will be added to the breadcrumbs. If `options.message` is not passed in, Snag will attempt to extract the message from `options.error`.
 @param options.message An error message.
 @param options.showMessageToClient `true` if it is intended/recommend for the error message to be shown directly to a user. Defaults to `false`.

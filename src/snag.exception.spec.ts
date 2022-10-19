@@ -38,6 +38,31 @@ describe('Snag', () => {
         expect(snag.message).toBe('foo')
     })
 
+    should('be able to accept error object', () => {
+        const error = new TypeError('Some error')
+        const snag = new Snag(error)
+        expect((snag.error = error))
+        expect(snag.message).toBe(error.message)
+        expect(snag.getStatus()).toBe(500)
+    })
+
+    should('be able to handle null types gracefully', () => {
+        const snag = new Snag(null as unknown as Error)
+        expect(snag.message).toBe('null')
+    })
+
+    should('be able to handle boolean types gracefully', () => {
+        const snag = new Snag(true as unknown as Error)
+        expect(snag.message).toBe('true')
+        const snag2 = new Snag(false as unknown as Error)
+        expect(snag2.message).toBe('false')
+    })
+
+    should('be able to handle number types gracefully', () => {
+        const snag = new Snag(1000 as unknown as Error)
+        expect(snag.message).toBe('1000')
+    })
+
     should('be able to accept custom options', () => {
         const nestedError = new Error()
         const options: ISnagOptions = {

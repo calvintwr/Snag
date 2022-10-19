@@ -4,7 +4,7 @@ exports.Snag = void 0;
 const util_1 = require("util");
 const snag_exception_codes_1 = require("./snag.exception.codes");
 class Snag extends Error {
-    constructor(options = {}) {
+    constructor(options) {
         super();
         this.showMessageToClient = false;
         this.statuses = [
@@ -29,61 +29,80 @@ class Snag extends Error {
         this.timestamptz = date.toISOString();
         if (typeof options === 'string') {
             this.message = options;
+            return this;
         }
-        else {
-            const { error, message, showMessageToClient, setStatus, tag, additionalTags, breadcrumbs, level, } = options;
-            let extractedMessage;
-            if (typeof message === 'string') {
-                extractedMessage = message;
+        if (typeof options === 'number') {
+            this.message = options.toString();
+            return this;
+        }
+        if (typeof options === 'boolean') {
+            this.message = options.toString();
+            return this;
+        }
+        if (options === null) {
+            this.message = 'null';
+            return this;
+        }
+        let safeOptions = {};
+        if (options instanceof Error) {
+            safeOptions.error = options;
+            Object.assign(safeOptions, options);
+        }
+        else if (typeof options === 'object' && options !== null) {
+            safeOptions = options;
+        }
+        const { error, message, showMessageToClient, setStatus, tag, additionalTags, breadcrumbs, level, } = safeOptions;
+        let extractedMessage;
+        if (typeof message === 'string') {
+            extractedMessage = message;
+        }
+        else if (error instanceof Error) {
+            extractedMessage = error.message;
+        }
+        else if (typeof error === 'object' && error !== null && 'message' in error) {
+            const errorWithMessageProp = error;
+            try {
+                extractedMessage = (0, util_1.format)(errorWithMessageProp.message);
             }
-            else if (error instanceof Error) {
-                extractedMessage = error.message;
-            }
-            else if (typeof error === 'object' && error !== null && 'message' in error) {
-                const errorWithMessageProp = error;
-                try {
-                    extractedMessage = (0, util_1.format)(errorWithMessageProp.message);
-                }
-                catch (error) {
-                    extractedMessage = '';
-                }
-            }
-            else {
+            catch (error) {
                 extractedMessage = '';
             }
-            this.message = extractedMessage;
-            if (showMessageToClient !== undefined)
-                this.showMessageToClient = showMessageToClient;
-            if (setStatus && setStatus !== 'DEFAULT') {
-                this.statuses = Object.keys(snag_exception_codes_1.exceptionCodes[setStatus]).reduce((value, key) => {
-                    return value.concat(snag_exception_codes_1.exceptionCodes[setStatus][key]);
-                }, [setStatus]);
-                for (const status of this.statuses) {
-                    const [protocol, code] = status.split('_');
-                    this.statusCodes[protocol.toLowerCase()] = parseInt(code);
-                }
-            }
-            this.statusCode = this.getStatus('http');
-            if (tag !== undefined) {
-                this.tag = tag;
-            }
-            else {
-                if (snag_exception_codes_1.notFoundCodes.includes(setStatus)) {
-                    this.tag = 'result_not_found';
-                }
-                else if (setStatus && !snag_exception_codes_1.unhandledCodes.includes(setStatus)) {
-                    this.tag = 'not_categorised';
-                }
-            }
-            if (additionalTags !== undefined)
-                this.additionalTags = additionalTags;
-            if (breadcrumbs !== undefined)
-                this.breadcrumbs = breadcrumbs;
-            if (error !== undefined)
-                this.error = error;
-            if (level !== undefined)
-                this.level = level;
         }
+        else {
+            extractedMessage = '';
+        }
+        this.message = extractedMessage;
+        if (showMessageToClient !== undefined)
+            this.showMessageToClient = showMessageToClient;
+        if (setStatus && setStatus !== 'DEFAULT') {
+            this.statuses = Object.keys(snag_exception_codes_1.exceptionCodes[setStatus]).reduce((value, key) => {
+                return value.concat(snag_exception_codes_1.exceptionCodes[setStatus][key]);
+            }, [setStatus]);
+            for (const status of this.statuses) {
+                const [protocol, code] = status.split('_');
+                this.statusCodes[protocol.toLowerCase()] = parseInt(code);
+            }
+        }
+        this.statusCode = this.getStatus('http');
+        if (tag !== undefined) {
+            this.tag = tag;
+        }
+        else {
+            if (snag_exception_codes_1.notFoundCodes.includes(setStatus)) {
+                this.tag = 'result_not_found';
+            }
+            else if (setStatus && !snag_exception_codes_1.unhandledCodes.includes(setStatus)) {
+                this.tag = 'not_categorised';
+            }
+        }
+        if (additionalTags !== undefined)
+            this.additionalTags = additionalTags;
+        if (breadcrumbs !== undefined)
+            this.breadcrumbs = breadcrumbs;
+        if (error !== undefined)
+            this.error = error;
+        if (level !== undefined)
+            this.level = level;
         this.stack = removeUnnecessaryStack(new Error().stack, new.target.name);
         if (Object.setPrototypeOf) {
             Object.setPrototypeOf(this, new.target.prototype);

@@ -1,0 +1,49 @@
+
+Snag is a modern Error object designed to store and passe error information in a debug-friendly, and API-orientated manner.
+
+```js
+throw new Snag('foo')
+```
+
+## Basic usage:
+
+```js
+// some code above...
+try {
+    const stuff = undefined
+    stuff.prop = true // this will error out
+} catch (originalError) {
+    // Snag will wrap around the native error object
+    // and provide API-oriented functionality
+    throw new Snag({
+        error: originalError,
+        message: 'We were not able to complete some task.',
+        statusCode: 'HTTP_400_Bad_Request',
+        tag: 'some_tag_the_frontend_can_use',
+        // message can be shown to client (i.e. on Alert/Modals).
+        showMessageToClient: true,
+        // we put `stuff` here which Sentry/GCP can see.
+        breadcrumbs: [stuff],
+    })
+}
+```
+If error is received from a Grpc operation, and you are communicating to client predominantly via Websocket:
+```js
+sendGrpc().catch(grpcError => {
+     throw new Snag({
+         error: grpcError,
+         // `WS_1011_Server_Error` also maps to `HTTP_500_Internal_Server_Error`, and other server errors for various protocols.
+         statusCode: 'WS_1011_Server_Error'
+     })
+}
+```
+## Options
+@param options Can be message in string, or an options object. If strings, defaults tag to 'not_handled'.
+@param options.error An error object of the original offending exception. If this is passed in, it will be added to the breadcrumbs. If `options.message` is not passed in, Snag will attempt to extract the message from `options.error`.
+@param options.message An error message.
+@param options.showMessageToClient `true` if it is intended/recommend for the error message to be shown directly to a user. Defaults to `false`.
+@param options.setStatus Use autocomplete for all available codes.
+@param options.tag A primary tag that can be used for downstream if/else or switch/case handling. Defaults to `not_handled`. `Note: Tags are not to be confused with code names within specifications. It can coincide with various code names if preferred, but is meant to be application-specific.`
+@param options.additionalTags Additional tags. `WARN: For performance, arrays passed in here can be subject to side-effects.`
+@param options.breadcrumbs Any useful debugging information. `WARN: For performance, arrays passed in here can be subject to side-effects.`
+@param options.level A level tag that can be used to categorise errors.

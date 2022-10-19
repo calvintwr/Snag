@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "declaration": true,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "es2017",
+        "sourceMap": true,
+        "outDir": "./dist",
+        "incremental": true,
+        "skipLibCheck": true,
+        "strictNullChecks": false,
+        "noImplicitAny": false,
+        "strictBindCallApply": false,
+        "forceConsistentCasingInFileNames": true,
+        "noFallthroughCasesInSwitch": false,
+        "baseUrl": "./",
+        "typeRoots": ["node_modules/@types", "src/typings"]
+    },
+    "include": [ "./src/**/*" ],
+    "exclude": [ "**/node_modules", "./dist/**/*", "**/**.spec.**", "**/**.types.**"]
+}

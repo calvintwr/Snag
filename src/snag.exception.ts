@@ -306,7 +306,10 @@ export class Snag<
                         break
                     }
                 } else {
-                    if (nestedError.error instanceof Error) {
+                    if (
+                        nestedError.error instanceof Error ||
+                        (typeof nestedError.error === 'object' && nestedError.error !== null)
+                    ) {
                         nestedError.error = { ...nestedError.error, stack: nestedError.error.stack }
                         nestedError = nestedError.error
                     } else {

@@ -274,7 +274,7 @@ describe('Snag', () => {
     describe('#toJSON', () => {
         should('output JSON data', () => {
             const snag = new Snag({ level: 'fatal' })
-            expect(snag).toMatchObject({
+            expect(snag.toJSON()).toMatchObject({
                 showMessageToClient: false,
                 statuses: [
                     'HTTP_500_Internal_Server_Error',
@@ -294,7 +294,7 @@ describe('Snag', () => {
 
         should('output JSON data even with unexpected types', () => {
             const snag = new Snag(null as unknown as Error)
-            expect(snag).toMatchObject({
+            expect(snag.toJSON()).toMatchObject({
                 message: 'null',
                 showMessageToClient: false,
                 statuses: [
@@ -313,17 +313,75 @@ describe('Snag', () => {
         })
 
         should('output nested error with it properties and stack', () => {
-            const nested = 'nested'
-            const nestedError = new Error(nested) as unknown as { nestedProp: string }
-            nestedError.nestedProp = 'foo'
+            const secondLevel = new Error('second level')
+            const firstLevel = new Error('first level') as unknown as { error: Error }
+            firstLevel.error = secondLevel
+            const snag = new Snag({
+                error: firstLevel,
+            })
+            expect(snag.toJSON()).toMatchObject({
+                error: {
+                    error: {
+                        stack: expect.stringContaining('second level'),
+                    },
+                    stack: expect.stringContaining('first level'),
+                },
+            })
+        })
+
+        should('output still process unexpected nested error type `object`', () => {
+            const nestedError = { foo: 'bar' }
             const snag = new Snag({
                 error: nestedError,
             })
-            expect(snag).toMatchObject({
+            expect(snag.toJSON()).toMatchObject({
+                error: nestedError,
+            })
+        })
+
+        should('output still process unexpected nested error type Array', () => {
+            const nestedError = ['foo', 'bar']
+            const snag = new Snag({
+                error: nestedError,
+            })
+            expect(snag.toJSON()).toMatchObject({
+                error: nestedError,
+            })
+        })
+
+        should('output unexpected nested error of unexpected types', () => {
+            expect(new Snag({ error: null }).toJSON()).toMatchObject({ error: null })
+            expect(new Snag({ error: 89089 }).toJSON()).toMatchObject({ error: 89089 })
+            expect(new Snag({ error: 'foo' }).toJSON()).toMatchObject({ error: 'foo' })
+            expect(new Snag({ error: true }).toJSON()).toMatchObject({ error: true })
+            expect(new Snag({ error: false }).toJSON()).toMatchObject({ error: false })
+        })
+
+        should('output nested error with unexpected object type', () => {
+            const secondLevel = null
+            const firstLevel = { message: { foo: 'bar' }, error: secondLevel }
+            firstLevel.error = secondLevel
+            const snag = new Snag({
+                error: firstLevel,
+            })
+            expect(snag.toJSON()).toMatchObject({
                 error: {
-                    nestedProp: nestedError.nestedProp,
-                    stack: expect.stringContaining(nested),
+                    error: null,
                 },
+                message: expect.stringContaining('foo'),
+            })
+        })
+
+        should('output nested error with other unexpected types', () => {
+            const secondLevel = null
+            const firstLevel = ['first level'] as unknown as { error: null; stack: string[] }
+            firstLevel.error = secondLevel
+            firstLevel.stack = ['weird stack']
+            const snag = new Snag({
+                error: firstLevel,
+            })
+            expect(snag.toJSON()).toMatchObject({
+                error: expect.arrayContaining(['first level']),
             })
         })
     })

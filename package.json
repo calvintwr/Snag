@@ -2,7 +2,7 @@
     "name": "snag",
     "version": "1.0.0",
     "description": "Snag is a modern Error object designed to store and passe error information in a debug-friendly, and API-orientated manner.",
-    "main": "dist/snag.exception.js",
+    "main": "dist/index.js",
     "author": "calvintwr <calvin14@gmail.com>",
     "license": "MIT",
     "private": false,

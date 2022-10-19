@@ -272,116 +272,139 @@ describe('Snag', () => {
     })
 
     describe('#toJSON', () => {
-        should('output JSON data', () => {
-            const snag = new Snag({ level: 'fatal' })
-            expect(snag.toJSON()).toMatchObject({
-                showMessageToClient: false,
-                statuses: [
-                    'HTTP_500_Internal_Server_Error',
-                    'AMQP_541_Internal_Error',
-                    'WS_1011_Server_Error',
-                    'GRPC_13_INTERNAL',
-                ],
-                statusCodes: { http: 500, amqp: 541, ws: 1011, grpc: 13 },
-                statusCode: 500,
-                tag: 'not_handled',
-                stack: expect.stringContaining('Snag'),
-                additionalTags: [],
-                breadcrumbs: [],
-                level: 'fatal',
+        describe('verbose = true', () => {
+            should('output JSON data', () => {
+                const snag = new Snag({ level: 'fatal' })
+                expect(snag.toJSON(true)).toMatchObject({
+                    showMessageToClient: false,
+                    statuses: [
+                        'HTTP_500_Internal_Server_Error',
+                        'AMQP_541_Internal_Error',
+                        'WS_1011_Server_Error',
+                        'GRPC_13_INTERNAL',
+                    ],
+                    statusCodes: { http: 500, amqp: 541, ws: 1011, grpc: 13 },
+                    statusCode: 500,
+                    tag: 'not_handled',
+                    stack: expect.stringContaining('Snag'),
+                    additionalTags: [],
+                    breadcrumbs: [],
+                    level: 'fatal',
+                })
             })
-        })
 
-        should('output JSON data even with unexpected types', () => {
-            const snag = new Snag(null as unknown as Error)
-            expect(snag.toJSON()).toMatchObject({
-                message: 'null',
-                showMessageToClient: false,
-                statuses: [
-                    'HTTP_500_Internal_Server_Error',
-                    'AMQP_541_Internal_Error',
-                    'WS_1011_Server_Error',
-                    'GRPC_13_INTERNAL',
-                ],
-                statusCodes: { http: 500, amqp: 541, ws: 1011, grpc: 13 },
-                statusCode: 500,
-                tag: 'not_handled',
-                stack: expect.stringContaining('Snag'),
-                additionalTags: [],
-                breadcrumbs: [],
+            should('output JSON data even with unexpected types', () => {
+                const snag = new Snag(null as unknown as Error)
+                expect(snag.toJSON(true)).toMatchObject({
+                    message: 'null',
+                    showMessageToClient: false,
+                    statuses: [
+                        'HTTP_500_Internal_Server_Error',
+                        'AMQP_541_Internal_Error',
+                        'WS_1011_Server_Error',
+                        'GRPC_13_INTERNAL',
+                    ],
+                    statusCodes: { http: 500, amqp: 541, ws: 1011, grpc: 13 },
+                    statusCode: 500,
+                    tag: 'not_handled',
+                    stack: expect.stringContaining('Snag'),
+                    additionalTags: [],
+                    breadcrumbs: [],
+                })
             })
-        })
 
-        should('output nested error with it properties and stack', () => {
-            const secondLevel = new Error('second level')
-            const firstLevel = new Error('first level') as unknown as { error: Error }
-            firstLevel.error = secondLevel
-            const snag = new Snag({
-                error: firstLevel,
-            })
-            expect(snag.toJSON()).toMatchObject({
-                error: {
+            should('output nested error with it properties and stack', () => {
+                const secondLevel = new Error('second level')
+                const firstLevel = new Error('first level') as unknown as { error: Error }
+                firstLevel.error = secondLevel
+                const snag = new Snag({
+                    error: firstLevel,
+                })
+                expect(snag.toJSON(true)).toMatchObject({
                     error: {
-                        stack: expect.stringContaining('second level'),
+                        error: {
+                            stack: expect.stringContaining('second level'),
+                        },
+                        stack: expect.stringContaining('first level'),
                     },
-                    stack: expect.stringContaining('first level'),
-                },
+                })
+            })
+
+            should('output still process unexpected nested error type `object`', () => {
+                const nestedError = { foo: 'bar' }
+                const snag = new Snag({
+                    error: nestedError,
+                })
+                expect(snag.toJSON(true)).toMatchObject({
+                    error: nestedError,
+                })
+            })
+
+            should('output still process unexpected nested error type Array', () => {
+                const nestedError = ['foo', 'bar']
+                const snag = new Snag({
+                    error: nestedError,
+                })
+                expect(snag.toJSON(true)).toMatchObject({
+                    error: nestedError,
+                })
+            })
+
+            should('output unexpected nested error of unexpected types', () => {
+                expect(new Snag({ error: null }).toJSON(true)).toMatchObject({ error: null })
+                expect(new Snag({ error: 89089 }).toJSON(true)).toMatchObject({ error: 89089 })
+                expect(new Snag({ error: 'foo' }).toJSON(true)).toMatchObject({ error: 'foo' })
+                expect(new Snag({ error: true }).toJSON(true)).toMatchObject({ error: true })
+                expect(new Snag({ error: false }).toJSON(true)).toMatchObject({ error: false })
+            })
+
+            should('output nested error with unexpected object type', () => {
+                const secondLevel = null
+                const firstLevel = { message: { foo: 'bar' }, error: secondLevel }
+                firstLevel.error = secondLevel
+                const snag = new Snag({
+                    error: firstLevel,
+                })
+                expect(snag.toJSON(true)).toMatchObject({
+                    error: {
+                        error: null,
+                    },
+                    message: expect.stringContaining('foo'),
+                })
+            })
+
+            should('output nested error with other unexpected types', () => {
+                const secondLevel = null
+                const firstLevel = ['first level'] as unknown as { error: null; stack: string[] }
+                firstLevel.error = secondLevel
+                firstLevel.stack = ['weird stack']
+                const snag = new Snag({
+                    error: firstLevel,
+                })
+                expect(snag.toJSON(true)).toMatchObject({
+                    error: expect.arrayContaining(['first level']),
+                })
             })
         })
-
-        should('output still process unexpected nested error type `object`', () => {
-            const nestedError = { foo: 'bar' }
-            const snag = new Snag({
-                error: nestedError,
-            })
-            expect(snag.toJSON()).toMatchObject({
-                error: nestedError,
-            })
-        })
-
-        should('output still process unexpected nested error type Array', () => {
-            const nestedError = ['foo', 'bar']
-            const snag = new Snag({
-                error: nestedError,
-            })
-            expect(snag.toJSON()).toMatchObject({
-                error: nestedError,
-            })
-        })
-
-        should('output unexpected nested error of unexpected types', () => {
-            expect(new Snag({ error: null }).toJSON()).toMatchObject({ error: null })
-            expect(new Snag({ error: 89089 }).toJSON()).toMatchObject({ error: 89089 })
-            expect(new Snag({ error: 'foo' }).toJSON()).toMatchObject({ error: 'foo' })
-            expect(new Snag({ error: true }).toJSON()).toMatchObject({ error: true })
-            expect(new Snag({ error: false }).toJSON()).toMatchObject({ error: false })
-        })
-
-        should('output nested error with unexpected object type', () => {
-            const secondLevel = null
-            const firstLevel = { message: { foo: 'bar' }, error: secondLevel }
-            firstLevel.error = secondLevel
-            const snag = new Snag({
-                error: firstLevel,
-            })
-            expect(snag.toJSON()).toMatchObject({
-                error: {
-                    error: null,
-                },
-                message: expect.stringContaining('foo'),
-            })
-        })
-
-        should('output nested error with other unexpected types', () => {
-            const secondLevel = null
-            const firstLevel = ['first level'] as unknown as { error: null; stack: string[] }
-            firstLevel.error = secondLevel
-            firstLevel.stack = ['weird stack']
-            const snag = new Snag({
-                error: firstLevel,
-            })
-            expect(snag.toJSON()).toMatchObject({
-                error: expect.arrayContaining(['first level']),
+        describe('verbose = false', () => {
+            should('output less properties', () => {
+                const snag = new Snag({
+                    message: 'foo',
+                })
+                expect(snag.toJSON()).toEqual({
+                    message: 'foo',
+                    showMessageToClient: false,
+                    statusCode: 500,
+                    statusCodes: {
+                        http: 500,
+                        amqp: 541,
+                        ws: 1011,
+                        grpc: 13,
+                    },
+                    tag: 'not_handled',
+                    additionalTags: [],
+                    level: 'nil',
+                })
             })
         })
     })

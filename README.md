@@ -65,3 +65,33 @@ snag.error === error // outputs true
 @param `options.breadcrumbs` Any useful debugging information. `WARN: For performance, arrays passed in here can be subject to side-effects.`
 
 @param `options.level` A level tag that can be used to categorise errors.
+
+## getStatus
+
+```js
+snag.getStatus() // defaults to http status code
+snag.getStatus('amqp') // gets `amqp` status code
+```
+
+You can also get the status using property accessor directly:
+
+```js
+snag.statusCode // this always defaults to http, regardless of what protocol was used.
+snag.statusCodes.ws // equivalent of snag.getStatus('ws')
+```
+
+## toJSON
+
+Snag provides a `#toJSON` method that can interface with some frameworks that uses errors classes with this method.
+
+By default, verbosity is switched off, which hides information such as nested errors, error stack, and breadcrumbs:
+```js
+snag.toJSON() // outputs JSON data.
+```
+
+Turning on verbosity:
+```js
+const json = snag.toJSON(true, 10)
+json.stack // this will print out the stack
+json.error.stack // you will also have nested error stacks.
+```

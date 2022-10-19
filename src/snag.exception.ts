@@ -291,8 +291,37 @@ export class Snag<
         return this.statusCodes[protocol]
     }
 
-    // TODO: remove properties when verbose is false
-    toJSON(verbose?: boolean, depth = 8) {
+    /**
+     * Formats error object into JSON
+     * @param verbose defaults to false, which removes additional/developmental info.
+     * @param depth defaults to 8. determines how many levels of error nesting to parse.
+     *
+     * @example
+     * snag.toJSON() // outputs without verbosity. Recommended for PRODUCTION
+     * sang.toJSON(true, 10) // outputs with verbose mode (recommended for DEVELOPMENT), and will format errors nested up to 10 levels.
+     */
+    toJSON(verbose = false, depth = 8) {
+        if (!verbose) {
+            const {
+                message,
+                showMessageToClient,
+                statusCode,
+                statusCodes,
+                tag,
+                additionalTags,
+                level,
+            } = this
+            return {
+                message,
+                showMessageToClient,
+                statusCode,
+                statusCodes,
+                tag,
+                additionalTags,
+                level,
+            }
+        }
+
         let error: { stack?: string; error?: Error & { error?: Error } }
         let nestedError: { stack?: string; error?: Error & { error?: Error } }
         for (let i = 0; i < depth; i++) {

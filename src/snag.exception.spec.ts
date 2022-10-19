@@ -292,6 +292,26 @@ describe('Snag', () => {
             })
         })
 
+        should('output JSON data even with unexpected types', () => {
+            const snag = new Snag(null as unknown as Error)
+            expect(snag).toMatchObject({
+                message: 'null',
+                showMessageToClient: false,
+                statuses: [
+                    'HTTP_500_Internal_Server_Error',
+                    'AMQP_541_Internal_Error',
+                    'WS_1011_Server_Error',
+                    'GRPC_13_INTERNAL',
+                ],
+                statusCodes: { http: 500, amqp: 541, ws: 1011, grpc: 13 },
+                statusCode: 500,
+                tag: 'not_handled',
+                stack: expect.stringContaining('Snag'),
+                additionalTags: [],
+                breadcrumbs: [],
+            })
+        })
+
         should('output nested error with it properties and stack', () => {
             const nested = 'nested'
             const nestedError = new Error(nested) as unknown as { nestedProp: string }

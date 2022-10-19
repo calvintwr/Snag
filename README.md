@@ -48,12 +48,20 @@ snag.error === error // outputs true
 ```
 
 ## Options
-@param options Can be message in string, any instances of Error, or an options object. If strings, defaults tag to 'not_handled'.
-@param options.error An error object of the original offending exception. If this is passed in, it will be added to the breadcrumbs. If `options.message` is not passed in, Snag will attempt to extract the message from `options.error`.
-@param options.message An error message.
-@param options.showMessageToClient `true` if it is intended/recommend for the error message to be shown directly to a user. Defaults to `false`.
-@param options.setStatus Use autocomplete for all available codes.
-@param options.tag A primary tag that can be used for downstream if/else or switch/case handling. Defaults to `not_handled`. `Note: Tags are not to be confused with code names within specifications. It can coincide with various code names if preferred, but is meant to be application-specific.`
-@param options.additionalTags Additional tags. `WARN: For performance, arrays passed in here can be subject to side-effects.`
-@param options.breadcrumbs Any useful debugging information. `WARN: For performance, arrays passed in here can be subject to side-effects.`
-@param options.level A level tag that can be used to categorise errors.
+@param `options` Can be message in string, any instances of Error, or an options object. If strings, defaults tag to 'not_handled'.
+
+@param `options.error` An error object of the original offending exception. If this is passed in, it will be added to the breadcrumbs. If `options.message` is not passed in, Snag will attempt to extract the message from `options.error`.
+
+@param `options.message` An error message.
+
+@param `options.showMessageToClient` `true` if it is intended/recommend for the error message to be shown directly to a user. Defaults to `false`.
+
+@param `options.setStatus` Use autocomplete for all available codes.
+
+@param `options.tag` A primary tag that can be used for downstream if/else or switch/case handling. Defaults to `not_handled`. `Note: Tags are not to be confused with code names within specifications. It can coincide with various code names if preferred, but is meant to be application-specific.`
+
+@param `options.additionalTags` Additional tags. `WARN: For performance, arrays passed in here can be subject to side-effects.`
+
+@param `options.breadcrumbs` Any useful debugging information. `WARN: For performance, arrays passed in here can be subject to side-effects.`
+
+@param `options.level` A level tag that can be used to categorise errors.

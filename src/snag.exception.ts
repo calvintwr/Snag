@@ -310,6 +310,8 @@ export class Snag<
                 tag,
                 additionalTags,
                 level,
+                timestamp,
+                timestamptz,
             } = this
             return {
                 message,
@@ -319,6 +321,8 @@ export class Snag<
                 tag,
                 additionalTags,
                 level,
+                timestamp,
+                timestamptz,
             }
         }
 

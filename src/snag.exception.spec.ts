@@ -404,6 +404,8 @@ describe('Snag', () => {
                     tag: 'not_handled',
                     additionalTags: [],
                     level: 'nil',
+                    timestamp: expect.any(Number),
+                    timestamptz: expect.any(String),
                 })
             })
         })

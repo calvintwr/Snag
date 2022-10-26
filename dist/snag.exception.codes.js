@@ -1,4 +1,6 @@
 "use strict";
+// TODO: deepFreeze not working somehow.
+// import { deepFreeze } from '@malt/utils'
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.notFoundCodes = exports.unhandledCodes = exports.exceptionCodes = void 0;
 exports.exceptionCodes = Object.freeze({
@@ -8,6 +10,7 @@ exports.exceptionCodes = Object.freeze({
         ws: 'WS_1011_Server_Error',
         grpc: 'GRPC_13_INTERNAL',
     },
+    /* HTTP */
     HTTP_400_Bad_Request: {
         amqp: 'AMQP_502_Syntax_Error',
         ws: 'WS_1007_Unsupported_Payload',
@@ -208,6 +211,7 @@ exports.exceptionCodes = Object.freeze({
         ws: 'WS_1011_Server_Error',
         grpc: 'GRPC_2_UNKNOWN',
     },
+    /* AMQP */
     AMQP_311_Content_Too_Large: {
         http: 'HTTP_413_Payload_Too_Large',
         ws: 'WS_1009_Close_Too_Large',
@@ -298,6 +302,7 @@ exports.exceptionCodes = Object.freeze({
         ws: 'WS_1011_Server_Error',
         grpc: 'GRPC_13_INTERNAL',
     },
+    /* WS */
     WS_1002_Close_Protocol_Error: {
         http: 'HTTP_400_Bad_Request',
         amqp: 'AMQP_503_Command_Invalid',
@@ -363,6 +368,7 @@ exports.exceptionCodes = Object.freeze({
         amqp: 'AMQP_530_Not_Allowed',
         grpc: 'GRPC_2_UNKNOWN',
     },
+    /* GRPC */
     GRPC_2_UNKNOWN: {
         http: 'HTTP_500_Internal_Server_Error',
         amqp: 'AMQP_541_Internal_Error',

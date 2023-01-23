@@ -1,5 +1,5 @@
 
-Snag is a modern Error object designed to store and passe error information in a debug-friendly, and API-orientated manner.
+Snag is a modern Error object designed to store and pass error information in a debug-friendly, and API-orientated manner.
 
 ```js
 throw new Snag('foo')

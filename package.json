@@ -1,6 +1,6 @@
 {
     "name": "snag",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Snag is a modern Error object designed to store and passe error information in a debug-friendly, and API-orientated manner.",
     "main": "dist/index.js",
     "author": "calvintwr <calvin14@gmail.com>",

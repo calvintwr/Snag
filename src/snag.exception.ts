@@ -1,6 +1,6 @@
 import { format } from 'util'
 import { exceptionCodes, notFoundCodes, unhandledCodes } from './snag.exception.codes'
-import { ISnagOptions } from './snag.exception.types'
+import { ISnagOptions, TSnagTags } from './snag.exception.types'
 
 type TProtocol = 'http' | 'amqp' | 'ws' | 'grpc'
 
@@ -60,8 +60,8 @@ type TProtocol = 'http' | 'amqp' | 'ws' | 'grpc'
  *
  */
 export class Snag<
-    T extends string = '',
-    U extends ISnagOptions<T> | string | Error = ISnagOptions<T>,
+    Tags extends string | TSnagTags = TSnagTags,
+    Options extends ISnagOptions<Tags> | string | Error = ISnagOptions<Tags>,
 > extends Error {
     get name() {
         return this.constructor.name
@@ -94,12 +94,12 @@ export class Snag<
         ws: 1011,
         grpc: 13,
     }
-    tag: ISnagOptions<T>['tag'] = 'not_handled'
-    additionalTags: ISnagOptions<T>['tag'][] = []
+    tag: ISnagOptions<Tags>['tag'] = 'not_handled'
+    additionalTags: ISnagOptions<Tags>['tag'][] = []
     breadcrumbs: unknown[] = []
     level: ISnagOptions['level'] = 'nil'
 
-    constructor(options?: U) {
+    constructor(options?: Options) {
         super()
 
         // set the timestamp
@@ -124,7 +124,7 @@ export class Snag<
             return this
         }
 
-        let safeOptions: ISnagOptions<T> = {}
+        let safeOptions: ISnagOptions<Tags> = {}
 
         if (options instanceof Error) {
             // Snag is actually able to accept all instances of Error class.
@@ -233,7 +233,9 @@ export class Snag<
      *
      */
     add(
-        options: Partial<Pick<ISnagOptions<T>, 'message' | 'additionalTags' | 'breadcrumbs'>> = {},
+        options: Partial<
+            Pick<ISnagOptions<Tags>, 'message' | 'additionalTags' | 'breadcrumbs'>
+        > = {},
     ) {
         const { message, additionalTags, breadcrumbs } = options
         if (message !== undefined) {
@@ -253,8 +255,8 @@ export class Snag<
      * A convenience if you don't want to redefine everything.
      * `NOTE: This is used when you want to avoid side effects.`
      */
-    new(options: ISnagOptions<T>) {
-        const snag = new Snag(options)
+    new(options: ISnagOptions<Tags>) {
+        const snag = new Snag<Tags>(options)
         const newKeys = Object.keys(options)
         const oldKeys = Object.keys(this)
         for (const oldKey of oldKeys) {

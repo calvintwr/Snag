@@ -1,4 +1,4 @@
-import { ISnagOptions } from './snag.exception.types';
+import { ISnagOptions, TSnagTags } from './snag.exception.types';
 declare type TProtocol = 'http' | 'amqp' | 'ws' | 'grpc';
 /**
  * Snag is a modern Error object designed to store and passe error information in a debug-friendly, and API-orientated manner.
@@ -55,7 +55,7 @@ declare type TProtocol = 'http' | 'amqp' | 'ws' | 'grpc';
  * @param options.level A level tag that can be used to categorise errors.
  *
  */
-export declare class Snag<T extends string, U extends ISnagOptions<T> | string | Error = ISnagOptions<T>> extends Error {
+export declare class Snag<Tags extends string | TSnagTags = TSnagTags, Options extends ISnagOptions<Tags> | string | Error = ISnagOptions<Tags>> extends Error {
     get name(): string;
     readonly timestamp: number;
     readonly timestamptz: string;
@@ -70,24 +70,24 @@ export declare class Snag<T extends string, U extends ISnagOptions<T> | string |
         ws: number;
         grpc: number;
     };
-    tag: ISnagOptions<T>['tag'];
-    additionalTags: ISnagOptions<T>['tag'][];
+    tag: ISnagOptions<Tags>['tag'];
+    additionalTags: ISnagOptions<Tags>['tag'][];
     breadcrumbs: unknown[];
     level: ISnagOptions['level'];
-    constructor(options?: U);
+    constructor(options?: Options);
     /**
      * Mostly a convenience to add to arrays, and also concatenate error messages.
      * Other properties can be changed directly like: `snag.statusCode = 999`
      * `NOTE (SIDE-EFFECTS): This will change the properties of the current instance.`
      *
      */
-    add(options?: Partial<Pick<ISnagOptions<T>, 'message' | 'additionalTags' | 'breadcrumbs'>>): this;
+    add(options?: Partial<Pick<ISnagOptions<Tags>, 'message' | 'additionalTags' | 'breadcrumbs'>>): this;
     /**
      * Works like #add, but returns a new instance with the desired alterations.
      * A convenience if you don't want to redefine everything.
      * `NOTE: This is used when you want to avoid side effects.`
      */
-    new(options: ISnagOptions<T>): Snag<string, ISnagOptions<T>>;
+    new(options: ISnagOptions<Tags>): Snag<Tags, ISnagOptions<Tags>>;
     getStatus(protocol?: TProtocol): number;
     /**
      * Formats error object into JSON
@@ -108,8 +108,8 @@ export declare class Snag<T extends string, U extends ISnagOptions<T> | string |
             ws: number;
             grpc: number;
         };
-        tag: import("./snag.exception.types").TSnagTags | T;
-        additionalTags: (import("./snag.exception.types").TSnagTags | T)[];
+        tag: TSnagTags | Tags;
+        additionalTags: (TSnagTags | Tags)[];
         level: "nil" | "fatal" | "error" | "warning" | "log" | "info" | "debug";
         timestamp: number;
         timestamptz: string;

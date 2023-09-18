@@ -60,7 +60,7 @@ type TProtocol = 'http' | 'amqp' | 'ws' | 'grpc'
  *
  */
 export class Snag<
-    T extends string,
+    T extends string = '',
     U extends ISnagOptions<T> | string | Error = ISnagOptions<T>,
 > extends Error {
     get name() {
